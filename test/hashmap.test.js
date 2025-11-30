@@ -25,8 +25,14 @@ describe("HashMap", () => {
         const map = new HashMap(2); // fuerza colisiones
         map.set("ab", 1);
         map.set("ba", 2);
+        map.set("abc", 3)
         // hash de "ab" y "ba" podría coincidir en array de largo 2
+        
         expect(map.get("ab")).to.equal(1);
         expect(map.get("ba")).to.equal(2);
+        expect(map.get("abc")).to.equal(3);
+
     });
+
+    
 });

@@ -6,15 +6,16 @@ vamos a usar una implementacion en particular:
 import { LinkedList } from "../src/linkedlist.js";
 
 export class HashMap {
-  constructor() {
+  constructor(largo) {
     this.table = [];
+    this.largo = largo ?? 20000;
   }
   set(key, value) {
     //primero obtengo el valor del hash del key
     let hash = hashAny(key);
     hash = Math.abs(hash);
 
-    let valorEnTable = hash % 20000;
+    let valorEnTable = hash % this.largo;
 
     if (this.table[valorEnTable] == null) {
       this.table[valorEnTable] = new LinkedList();
@@ -28,7 +29,7 @@ export class HashMap {
     let hash = hashAny(key);
     hash = Math.abs(hash);
 
-    let valorEnTable = hash % 20000;
+    let valorEnTable = hash % this.largo;
 
     if (this.table[valorEnTable] == null) {
       return;
@@ -53,7 +54,7 @@ export class HashMap {
     let hash = hashAny(key);
     hash = Math.abs(hash);
 
-    let valorEnTable = hash % 20000;
+    let valorEnTable = hash % this.largo;
 
     if (this.table[valorEnTable] == null) {
       return;
