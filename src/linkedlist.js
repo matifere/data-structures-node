@@ -1,95 +1,123 @@
-
-
 export class LinkedList {
-  constructor() {
+  constructor(comparator) {
+    // comparator: optional function (a, b) => boolean
     this.lgth = 0;
     this.head = null;
+    this._cmp = typeof comparator === "function" ? comparator : LinkedList.defaultComparator;
+  }
+
+  static defaultComparator(a, b) {
+    // rápido check de identidad (primitivos o misma referencia)
+    if (a === b) return true;
+
+    // si 'a' tiene equals
+    if (a != null && typeof a.equals === "function") {
+      try { return a.equals(b); } catch (e) { /* si equals lanza, ignoramos */ }
+    }
+
+    // si 'b' tiene equals
+    if (b != null && typeof b.equals === "function") {
+      try { return b.equals(a); } catch (e) { /* ignorar */ }
+    }
+
+    // fallback: no iguales
+    return false;
   }
 
   size() {
     return this.lgth;
   }
 
+  isEmpty() {
+    return this.lgth === 0;
+  }
+
   append(elem) {
-    if (elem != null) {
-      if (this.head == null) {
-        this.head = new Node(elem);
-        this.lgth += 1;
-        return;
-      }
-      let actualNode = this.head;
-      while (actualNode.next != null) {
-        actualNode = actualNode.next;
-      }
-      actualNode.next = new Node(elem);
-      this.lgth += 1;
+    if (elem === null || elem === undefined) return;
+
+    const newNode = new Node(elem);
+    if (this.head === null) {
+      this.head = newNode;
+      this.lgth++;
+      return;
     }
+
+    let actual = this.head;
+    while (actual.next !== null) actual = actual.next;
+    actual.next = newNode;
+    this.lgth++;
   }
 
   prepend(elem) {
-    if (elem != null) {
-      if (this.head == null) {
-        this.head = new Node(elem);
-        this.lgth += 1;
-        return;
-      }
-      let moveHead = this.head;
-      this.head = new Node(elem);
-      this.head.next = moveHead;
-      this.lgth += 1;
-    }
+    if (elem === null || elem === undefined) return;
+
+    const newNode = new Node(elem);
+    newNode.next = this.head;
+    this.head = newNode;
+    this.lgth++;
   }
-  //intenta devolver el nodo que tiene el valor elem
+
+  // Devuelve el nodo si lo encuentra, sino null
   find(elem) {
-    if (this.head == null) {
-      this.head = new Node(elem);
-      return;
-    }
-
+    if (this.head === null) return null;
     let actual = this.head;
-    while (actual.value != elem) {
-      if (actual.next != null) {
-        actual = actual.next;
-      } else {
-        break;
-      }
+    while (actual !== null) {
+      if (this._cmp(actual.value, elem)) return actual;
+      actual = actual.next;
     }
-    if (actual.value == elem) {
-      return actual;
-    }
-
     return null;
   }
 
-
+  // Elimina la primera ocurrencia que cumpla comparator; devuelve true si borró
   remove(elem) {
+    if (this.head === null) return false;
+
+    // caso cabeza
+    if (this._cmp(this.head.value, elem)) {
+      this.head = this.head.next;
+      this.lgth--;
+      return true;
+    }
+
+    let prev = this.head;
+    let curr = this.head.next;
+
+    while (curr !== null) {
+      if (this._cmp(curr.value, elem)) {
+        prev.next = curr.next;
+        this.lgth--;
+        return true;
+      }
+      prev = curr;
+      curr = curr.next;
+    }
+
+    return false;
+  }
+
+  // utilidades
+  toArray() {
+    const out = [];
     let actual = this.head;
+    while (actual !== null) {
+      out.push(actual.value);
+      actual = actual.next;
+    }
+    return out;
+  }
 
-    //si es el primero lo borramos
-    if (actual.value == elem) {
-      this.head = actual.next;
-      return;
-    }
-    if(actual.next.value == null){
-        return;
-    }
+  clear() {
+    this.head = null;
+    this.lgth = 0;
+  }
 
-    while (actual.next.value != elem) {
-      if (actual.next == null || actual.next.value == null) {
-        break;
-      } else {
-        actual = actual.next;
-      }
+  // iterador para for..of
+  *[Symbol.iterator]() {
+    let actual = this.head;
+    while (actual !== null) {
+      yield actual.value;
+      actual = actual.next;
     }
-    if (actual.next.value == elem) {
-      if (actual.next.next == null) {
-        actual.next = null;
-        return;
-      }
-      actual.next = actual.next.next;
-    }
-
-    return;
   }
 }
 
